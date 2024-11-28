@@ -6,7 +6,6 @@ class Calculator:
     def calculate_bmi(weight, height):
         height_in_meters = height / 100
         bmi = weight / (height_in_meters ** 2)
-        
         return round(bmi, 2)
 
         
@@ -15,7 +14,6 @@ class Calculator:
             bmr = 88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)
         else:
             bmr = 447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)
-        
         return round(bmr * activity_level, 2)
 
 
@@ -31,7 +29,6 @@ class Calculator:
             "Интенсивные": 0.15
         }
         extra_activity = days * intensity_multipliers[intensity]
-        
         return round(base_activity + extra_activity, 2)
 
 
