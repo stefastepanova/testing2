@@ -40,3 +40,14 @@ jobs:
           coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
+        with:
+          args: >
+            -Dsonar.projectKey=stefastepanova_testing2
+            -Dsonar.organization=stefastepanova
+            -Dsonar.sources=.
+            -Dsonar.python.coverage.reportPaths=coverage.xml
