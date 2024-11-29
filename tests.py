@@ -251,5 +251,75 @@ class TestHealthCalculator(unittest.TestCase):
 
         mock_showerror.assert_called_once_with("Ошибка", "Возраст должен быть числом.")
 
+class TestAppIntegration(unittest.TestCase):
+    def setUp(self):
+        """Настраиваем тестируемое приложение."""
+        self.root = tk.Tk()
+        self.app = App(self.root)
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "25")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+    def tearDown(self):
+        """Закрываем приложение после теста."""
+        self.root.destroy()
+
+    def test_bmi_and_calories(self):
+        """Тестируем взаимодействие расчета ИМТ и калорийности."""
+        weight = float(self.app.weight_entry.get())
+        height = float(self.app.height_entry.get())
+        age = int(self.app.age_entry.get())
+        gender = self.app.gender_var.get()
+        days = int(self.app.days_entry.get())
+        intensity = self.app.intensity_var.get()
+
+        # Взаимодействие: сначала рассчитываем активность, затем калории
+        activity_level = Calculator.calculate_activity_level(days, intensity)
+        calories = Calculator.calculate_calories(weight, height, age, gender, activity_level)
+
+        # Взаимодействие: рассчитываем ИМТ
+        bmi = Calculator.calculate_bmi(weight, height)
+
+        self.assertAlmostEqual(bmi, 24.22, places=2)
+        self.assertAlmostEqual(calories, 2549.79, places=1)
+
+    def test_calories_and_water(self):
+        """Тестируем взаимодействие расчета калорийности и нормы воды."""
+        weight = float(self.app.weight_entry.get())
+        height = float(self.app.height_entry.get())
+        age = int(self.app.age_entry.get())
+        gender = self.app.gender_var.get()
+        days = int(self.app.days_entry.get())
+        intensity = self.app.intensity_var.get()
+
+        # Взаимодействие: рассчитываем активность и калории
+        activity_level = Calculator.calculate_activity_level(days, intensity)
+        calories = Calculator.calculate_calories(weight, height, age, gender, activity_level)
+
+        # Взаимодействие: рассчитываем норму воды
+        water = Calculator.calculate_water(weight)
+
+        self.assertAlmostEqual(calories, 2549.79, places=1)
+        self.assertEqual(water, 2.1)
+
+    def test_activity_and_calories(self):
+        """Тестируем взаимодействие расчета уровня активности и калорийности."""
+        weight = float(self.app.weight_entry.get())
+        height = float(self.app.height_entry.get())
+        age = int(self.app.age_entry.get())
+        gender = self.app.gender_var.get()
+        days = int(self.app.days_entry.get())
+        intensity = self.app.intensity_var.get()
+
+        # Взаимодействие: рассчитываем уровень активности, затем калории
+        activity_level = Calculator.calculate_activity_level(days, intensity)
+        calories = Calculator.calculate_calories(weight, height, age, gender, activity_level)
+
+        self.assertEqual(activity_level, 1.5)
+        self.assertAlmostEqual(calories, 2549.79, places=1)
+
 if __name__ == "__main__":
     unittest.main()
