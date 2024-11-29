@@ -2,12 +2,15 @@ import unittest
 from main import Calculator
 from main import App
 import tkinter as tk
+from tkinter import messagebox
+from unittest.mock import patch
 
 class TestHealthCalculator(unittest.TestCase):
 
     def setUp(self):
         self.root = tk.Tk()
         self.app = App(self.root)
+        self.root.withdraw()
 
     # Тест расчёта BMI
     def test_bmi_calculation_correct(self):
@@ -146,6 +149,107 @@ class TestHealthCalculator(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.app.validate_days("-1")
         self.assertEqual(str(context.exception), "Количество тренировок не может быть отрицательным.")
+
+    @patch("tkinter.messagebox.showinfo")
+    def test_calculate_valid_inputs(self, mock_showinfo):
+        """Тест полного расчёта с корректными данными."""
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "30")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showinfo.assert_called_once()
+        self.assertIn("Ваш ИМТ: 24.22", mock_showinfo.call_args[0][1])
+        self.assertIn("Рекомендуемая норма калорий: 2507.04", mock_showinfo.call_args[0][1])
+        self.assertIn("Рекомендуемая норма воды: 2.1", mock_showinfo.call_args[0][1])
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_invalid_weight(self, mock_showerror):
+        """Тест на некорректный вес (отрицательное значение)."""
+        self.app.weight_entry.insert(0, "-70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "30")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Вес должен быть положительным числом.")
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_empty_weight(self, mock_showerror):
+        """Тест на пустое поле веса."""
+        self.app.weight_entry.insert(0, "")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "30")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Поле 'Вес' не может быть пустым.")
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_non_numeric_height(self, mock_showerror):
+        """Тест на некорректное значение роста (нечисловое)."""
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "abc")
+        self.app.age_entry.insert(0, "30")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Рост должен быть числом.")
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_invalid_days(self, mock_showerror):
+        """Тест на некорректное количество тренировок (отрицательное значение)."""
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "30")
+        self.app.days_entry.insert(0, "-1")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Количество тренировок не может быть отрицательным.")
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_empty_age(self, mock_showerror):
+        """Тест на пустое поле возраста."""
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Поле 'Возраст' не может быть пустым.")
+
+    @patch("tkinter.messagebox.showerror")
+    def test_calculate_non_numeric_age(self, mock_showerror):
+        """Тест на некорректное значение возраста (нечисловое)."""
+        self.app.weight_entry.insert(0, "70")
+        self.app.height_entry.insert(0, "170")
+        self.app.age_entry.insert(0, "abc")
+        self.app.days_entry.insert(0, "3")
+        self.app.gender_var.set("Мужской")
+        self.app.intensity_var.set("Умеренные")
+
+        self.app.calculate()
+
+        mock_showerror.assert_called_once_with("Ошибка", "Возраст должен быть числом.")
 
 if __name__ == "__main__":
     unittest.main()
